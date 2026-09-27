@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#050607" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LumaLog" />
+  <style>
+
+:root{
+  --bg:#050607;--panel:rgba(14,16,18,.72);--line:rgba(255,255,255,.12);
+  --text:#f4f6f7;--muted:#9aa2a9;--accent:#ff3b30;--green:#35d07f;
+  --safeT:env(safe-area-inset-top);--safeB:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,#app{margin:0;width:100%;height:100%;background:#000;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Inter,sans-serif;overflow:hidden}
+button,select,input{font:inherit}
+button{color:inherit}
+.screen{position:relative;width:100%;height:100%;background:#000}
+#camera,#monitor{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+#monitor{display:none}
+.glass{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.topbar{position:absolute;top:calc(var(--safeT) + 8px);left:12px;right:12px;height:58px;border-radius:18px;display:flex;align-items:center;padding:8px 10px;gap:12px}
+.brand{display:flex;align-items:center;gap:9px;min-width:160px}
+.logo,.heroLogo{display:grid;place-items:center;background:#fff;color:#050607;font-weight:900;border-radius:10px}
+.logo{width:34px;height:34px}.heroLogo{width:74px;height:74px;border-radius:20px;font-size:34px;margin:auto}
+.brand strong{display:block;font-size:15px}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.13em;margin-top:2px}
+.topchips{display:flex;gap:7px;flex:1;justify-content:center}
+.chip{border:1px solid var(--line);background:#0c0e10;border-radius:9px;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:.06em}
+.chip.accent{border-color:rgba(255,59,48,.5)}
+.iconBtn{width:38px;height:38px;border:0;background:#111519;border-radius:10px;font-size:19px}
+.leftRail,.rightRail{position:absolute;top:50%;transform:translateY(-50%);border-radius:16px;padding:6px}
+.leftRail{left:12px;display:grid;gap:5px}
+.railBtn{border:0;background:transparent;border-radius:9px;padding:9px 8px;font-size:9px;font-weight:850;letter-spacing:.06em}
+.railBtn.active{background:#fff;color:#050607}
+.rightRail{right:12px;width:110px;padding:12px}
+.rightRail label{display:flex;justify-content:space-between;color:var(--muted);font-size:8px;font-weight:800;margin-top:8px}
+.rightRail output{color:#fff}
+.rightRail input{width:100%;accent-color:#fff}
+.utility{width:100%;margin-top:10px;border:1px solid var(--line);background:#111519;border-radius:9px;padding:8px;font-size:9px;font-weight:800}
+.utility:disabled{opacity:.35}
+.bottombar{position:absolute;bottom:calc(var(--safeB) + 9px);left:50%;transform:translateX(-50%);width:min(680px,calc(100% - 26px));height:76px;border-radius:24px;display:grid;grid-template-columns:72px 1fr 82px 1fr 72px;align-items:center;padding:8px 12px;gap:7px}
+.lensBtn{border:1px solid var(--line);background:#101316;border-radius:13px;height:45px;font-size:10px;font-weight:850}
+.statusBlock,.timerBlock{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:10px}
+.statusBlock small,.timerBlock small{width:100%;color:var(--muted);font-size:8px}
+.timerBlock{justify-content:flex-end;text-align:right}.timerBlock strong{font-variant-numeric:tabular-nums}
+#statusDot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.recordBtn{width:64px;height:64px;border-radius:50%;border:3px solid white;background:transparent;padding:5px;margin:auto}
+.recordBtn span{display:block;width:100%;height:100%;border-radius:50%;background:var(--accent);transition:.2s}
+.recordBtn.recording span{border-radius:11px;transform:scale(.58)}
+.gate{position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#1b2025,#030405 70%);z-index:20;padding:24px}
+.gateCard{width:min(420px,100%);border-radius:28px;padding:28px;text-align:center}
+.gateCard h1{margin:14px 0 8px}.gateCard p{color:#c6cbd0;line-height:1.45}.gateCard small{display:block;color:var(--muted);margin-top:14px;line-height:1.35}
+.primary,.secondary{border:0;border-radius:13px;padding:14px 16px;font-weight:850;letter-spacing:.04em}
+.primary{background:#fff;color:#050607}.secondary{background:#191d21;color:#fff;border:1px solid var(--line)}
+.gateCard .primary{width:100%;margin-top:8px}
+.hidden{display:none!important}
+.sheet{position:absolute;inset:0;z-index:30;background:#080a0c;overflow:auto;padding:calc(var(--safeT) + 8px) 16px calc(var(--safeB) + 30px)}
+.sheet header{position:sticky;top:0;display:flex;align-items:center;gap:12px;background:#080a0cdd;backdrop-filter:blur(16px);z-index:2;padding:8px 0 14px}
+.sheet h2{margin:0;font-size:22px}.back{border:0;background:#15191d;width:40px;height:40px;border-radius:12px;font-size:30px;line-height:1}
+.cards{display:grid;gap:12px;max-width:760px;margin:auto}
+.card{background:#101316;border:1px solid var(--line);border-radius:18px;padding:16px}
+.card h3{margin:0 0 14px;font-size:14px}
+.card label{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.07);padding:12px 0;color:#d6dbe0;font-size:13px}
+.card select{max-width:50%;background:#191d21;color:#fff;border:0;padding:8px;border-radius:9px}
+.card input[type=checkbox]{width:22px;height:22px}
+.card input[type=range]{max-width:55%}
+.card pre{white-space:pre-wrap;font-size:10px;color:#b9c0c6;background:#080a0c;padding:12px;border-radius:10px;max-height:260px;overflow:auto}
+.warning{border-color:rgba(255,193,7,.35)}.warning p{color:#c9cdd1;line-height:1.45;font-size:12px}
+#playback{width:100%;max-height:60vh;background:#000;border-radius:12px}.actions{display:flex;gap:8px;margin-top:12px}.actions button{flex:1}
+.histogram{position:absolute;left:92px;bottom:100px;border-radius:14px;padding:9px;width:260px}
+.histogram canvas{width:100%;height:78px}.panelTitle{font-size:8px;font-weight:800;color:var(--muted);margin-bottom:5px}
+.grid{position:absolute;inset:0;pointer-events:none;background:
+ linear-gradient(to right,transparent 33.1%,rgba(255,255,255,.3) 33.2%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.3%,rgba(255,255,255,.3) 66.4%,rgba(255,255,255,.3) 66.7%,transparent 66.8%),
+ linear-gradient(to bottom,transparent 33.1%,rgba(255,255,255,.3) 33.2%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.3%,rgba(255,255,255,.3) 66.4%,rgba(255,255,255,.3) 66.7%,transparent 66.8%)}
+.badge{position:absolute;z-index:4;background:#101316cc;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:8px;font-weight:900}.top-left{top:80px;left:95px}
+.false-legend{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);display:flex;border-radius:8px;overflow:hidden;z-index:4}.fc{width:34px;padding:5px 0;text-align:center;font-size:8px;color:white}.fc1{background:#381c79}.fc2{background:#16439a}.fc3{background:#03a0c7}.fc4{background:#2bbd63}.fc5{background:#d6b626}.fc6{background:#e87416}.fc7{background:#f5f5f5;color:#111}
+@media (orientation:portrait){
+ .topchips{display:none}.rightRail{top:auto;bottom:110px;right:10px}.leftRail{top:auto;bottom:110px;left:10px;grid-template-columns:repeat(4,1fr);max-width:220px}
+ .bottombar{grid-template-columns:48px 1fr 72px 1fr 48px}.brand{min-width:0}.brand small{display:none}
+ .histogram{left:10px;bottom:205px}.false-legend{bottom:205px}
+}
+
+</style>
+  <title>LumaLog Web</title>
+</head>
+<body>
+  <main id="app">
+    <section id="cameraScreen" class="screen">
+      <video id="camera" playsinline muted></video>
+      <canvas id="monitor"></canvas>
+      <div id="grid" class="grid hidden" aria-hidden="true"></div>
+      <div id="zebraLegend" class="badge top-left hidden">ZEBRA 95+</div>
+      <div id="falseLegend" class="false-legend hidden">
+        <span class="fc fc1">0</span><span class="fc fc2">20</span><span class="fc fc3">40</span>
+        <span class="fc fc4">55</span><span class="fc fc5">70</span><span class="fc fc6">85</span><span class="fc fc7">100</span>
+      </div>
+
+      <header class="topbar glass">
+        <div class="brand">
+          <div class="logo">L</div>
+          <div><strong>LumaLog</strong><small id="modeLabel">WEB CAMERA</small></div>
+        </div>
+        <div class="topchips">
+          <button class="chip" id="resChip">AUTO</button>
+          <button class="chip" id="fpsChip">AUTO FPS</button>
+          <button class="chip accent" id="codecChip">REC</button>
+        </div>
+        <button class="iconBtn" id="settingsBtn" aria-label="Impostazioni">⚙︎</button>
+      </header>
+
+      <aside class="leftRail glass">
+        <button class="railBtn active" data-monitor="normal">STD</button>
+        <button class="railBtn" data-monitor="log">LOG</button>
+        <button class="railBtn" id="zebraBtn">ZEBRA</button>
+        <button class="railBtn" id="falseBtn">FALSE</button>
+        <button class="railBtn" id="peakingBtn">PEAK</button>
+        <button class="railBtn" id="histBtn">HIST</button>
+        <button class="railBtn" id="gridBtn">GRID</button>
+      </aside>
+
+      <section id="histogramPanel" class="histogram glass hidden">
+        <div class="panelTitle">LUMA HISTOGRAM</div>
+        <canvas id="histogram" width="360" height="120"></canvas>
+      </section>
+
+      <aside class="rightRail glass">
+        <label>ZOOM <output id="zoomOut">1.0×</output></label>
+        <input id="zoom" type="range" min="1" max="1" step="0.1" value="1" disabled />
+        <label>EV <output id="evOut">AUTO</output></label>
+        <input id="ev" type="range" min="0" max="0" step="0.1" value="0" disabled />
+        <label>FOCUS <output id="focusOut">AUTO</output></label>
+        <input id="focus" type="range" min="0" max="1" step="0.01" value="0" disabled />
+        <button class="utility" id="torchBtn" disabled>TORCH</button>
+      </aside>
+
+      <footer class="bottombar glass">
+        <button class="lensBtn" id="cameraBtn">CAM</button>
+        <div class="statusBlock">
+          <span id="statusDot"></span><span id="statusText">PRONTO</span>
+          <small id="captureInfo">nessuna sessione</small>
+        </div>
+        <button id="recordBtn" class="recordBtn" aria-label="Registra"><span></span></button>
+        <div class="timerBlock">
+          <strong id="timer">00:00:00</strong>
+          <small id="sizeLabel">0 MB</small>
+        </div>
+        <button class="lensBtn" id="clipsBtn">CLIPS</button>
+      </footer>
+
+      <div id="permissionGate" class="gate">
+        <div class="gateCard glass">
+          <div class="heroLogo">L</div>
+          <h1>LumaLog Web</h1>
+          <p>Camera professionale web per iPhone. Nessun account Developer e nessun pagamento.</p>
+          <button id="startBtn" class="primary">ATTIVA FOTOCAMERA</button>
+          <small>La fotocamera e il microfono restano sul dispositivo. Il browser chiederà i permessi.</small>
+        </div>
+      </div>
+    </section>
+
+    <section id="settingsScreen" class="sheet hidden">
+      <header><button class="back">‹</button><h2>Impostazioni</h2></header>
+      <div class="cards">
+        <article class="card">
+          <h3>Capture</h3>
+          <label>Camera<select id="cameraSelect"></select></label>
+          <label>Risoluzione<select id="resolution">
+            <option value="auto">Automatica</option><option value="1920x1080">1080p</option>
+            <option value="3840x2160">4K richiesta</option>
+          </select></label>
+          <label>Frame rate<select id="fps">
+            <option value="auto">Automatico</option><option>24</option><option>25</option><option>30</option><option>60</option>
+          </select></label>
+          <label>Microfono<input id="audioToggle" type="checkbox" checked /></label>
+        </article>
+        <article class="card">
+          <h3>Monitoring</h3>
+          <label>Zebra threshold <span id="zebraValue">95%</span><input id="zebraThreshold" type="range" min="50" max="100" value="95" /></label>
+          <label>Custom Log preview <input id="logToggle" type="checkbox" /></label>
+          <label>Mirror front camera <input id="mirrorToggle" type="checkbox" checked /></label>
+        </article>
+        <article class="card">
+          <h3>Diagnostica reale</h3>
+          <pre id="diagnostics">Avvia la camera per leggere le capabilities esposte da Safari.</pre>
+          <button id="copyDiag" class="secondary">COPIA DIAGNOSTICA</button>
+        </article>
+        <article class="card warning">
+          <h3>Limiti tecnici</h3>
+          <p>Questa versione Web non dichiara Apple Log, ProRes, ISO/shutter/WB hardware o 10-bit se Safari non li espone. LOG è solo una trasformazione di monitoraggio software.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="clipsScreen" class="sheet hidden">
+      <header><button class="back">‹</button><h2>Ultima clip</h2></header>
+      <div class="cards">
+        <article class="card">
+          <video id="playback" controls playsinline></video>
+          <p id="clipMeta">Nessuna clip registrata.</p>
+          <div class="actions">
+            <button id="shareBtn" class="primary" disabled>CONDIVIDI / SALVA</button>
+            <button id="downloadBtn" class="secondary" disabled>SCARICA</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script>
+
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const video = $('#camera'), canvas = $('#monitor'), ctx = canvas.getContext('2d', {willReadFrequently:true});
+  const hist = $('#histogram'), hctx = hist.getContext('2d');
+  let stream=null, recorder=null, chunks=[], blob=null, blobURL=null, timerID=null, startedAt=0, bytes=0;
+  let monitorMode='normal', zebra=false, falseColor=false, peaking=false, histOn=false, processing=false;
+  let currentDeviceId=null, currentTrack=null, caps={}, settings={};
+  const state = {audio:true,resolution:'auto',fps:'auto',mirror:true,zebraThreshold:95};
+
+  function status(t, color='#35d07f'){ $('#statusText').textContent=t; $('#statusDot').style.background=color; }
+  function fmtTime(ms){ const s=Math.floor(ms/1000), h=Math.floor(s/3600), m=Math.floor((s%3600)/60); return [h,m,s%60].map(x=>String(x).padStart(2,'0')).join(':'); }
+  function bestMime(){
+    const types=[
+      'video/mp4;codecs=h264,aac','video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4',
+      'video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'
+    ];
+    return types.find(t=>window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+  }
+  async function startCamera(){
+    stopTracks();
+    status('APERTURA…','#f0b429');
+    const v={facingMode:{ideal:'environment'}};
+    if(currentDeviceId) v.deviceId={exact:currentDeviceId};
+    if(state.resolution!=='auto'){
+      const [w,h]=state.resolution.split('x').map(Number); v.width={ideal:w}; v.height={ideal:h};
+    }
+    if(state.fps!=='auto') v.frameRate={ideal:Number(state.fps)};
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:v,audio:state.audio});
+      video.srcObject=stream; await video.play();
+      currentTrack=stream.getVideoTracks()[0];
+      caps=currentTrack.getCapabilities?.() || {}; settings=currentTrack.getSettings?.() || {};
+      currentDeviceId=settings.deviceId || currentDeviceId;
+      await enumerate();
+      setupControls(); updateDiagnostics();
+      $('#permissionGate').classList.add('hidden');
+      status('PRONTO'); $('#captureInfo').textContent=`${settings.width||'?'}×${settings.height||'?'} • ${Math.round(settings.frameRate||0)||'auto'} fps`;
+      $('#resChip').textContent=settings.height ? `${settings.height}P` : 'AUTO';
+      $('#fpsChip').textContent=settings.frameRate ? `${Math.round(settings.frameRate)} FPS` : 'AUTO FPS';
+      $('#codecChip').textContent=bestMime().includes('mp4') ? 'MP4' : 'WEBM';
+      processLoop();
+    }catch(e){ console.error(e); status('ERRORE','#ff3b30'); alert('Impossibile aprire fotocamera/microfono. Controlla i permessi Safari e riprova.\n\n'+e.message); }
+  }
+  function stopTracks(){ if(stream) stream.getTracks().forEach(t=>t.stop()); stream=null; currentTrack=null; }
+  async function enumerate(){
+    const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+    const sel=$('#cameraSelect'); sel.innerHTML='';
+    devices.forEach((d,i)=>{ const o=document.createElement('option');o.value=d.deviceId;o.textContent=d.label||`Camera ${i+1}`; if(d.deviceId===currentDeviceId)o.selected=true;sel.appendChild(o);});
+  }
+  function rangeSetup(id, capName, outId, formatter=x=>x){
+    const el=$(id), out=$(outId), c=caps[capName];
+    if(c && typeof c==='object' && 'min' in c){
+      el.disabled=false; el.min=c.min;el.max=c.max;el.step=c.step||0.1; const val=settings[capName]??c.min; el.value=val; out.textContent=formatter(val);
+      el.oninput=async()=>{ try{await currentTrack.applyConstraints({advanced:[{[capName]:Number(el.value)}]});out.textContent=formatter(Number(el.value));}catch(e){console.warn(e)}};
+    } else { el.disabled=true; out.textContent='N/D'; }
+  }
+  function setupControls(){
+    rangeSetup('#zoom','zoom','#zoomOut',x=>Number(x).toFixed(1)+'×');
+    rangeSetup('#ev','exposureCompensation','#evOut',x=>(x>0?'+':'')+Number(x).toFixed(1));
+    rangeSetup('#focus','focusDistance','#focusOut',x=>Number(x).toFixed(2));
+    const torch=!!caps.torch; $('#torchBtn').disabled=!torch; $('#torchBtn').dataset.on='0'; $('#torchBtn').textContent=torch?'TORCH':'TORCH N/D';
+  }
+  function updateDiagnostics(){
+    const report={userAgent:navigator.userAgent,mediaRecorder:!!window.MediaRecorder,mimeSelected:bestMime(),settings,capabilities:caps};
+    $('#diagnostics').textContent=JSON.stringify(report,null,2);
+  }
+
+  function sizeCanvas(){
+    const w=video.videoWidth||1280,h=video.videoHeight||720;
+    const maxW=720, scale=Math.min(1,maxW/w); canvas.width=Math.round(w*scale);canvas.height=Math.round(h*scale);
+  }
+  function processLoop(){
+    if(processing) return; processing=true;
+    const loop=()=>{
+      if(!stream){processing=false;return}
+      if(video.readyState>=2){
+        if(!canvas.width) sizeCanvas();
+        const needCanvas=monitorMode==='log'||zebra||falseColor||peaking;
+        canvas.style.display=needCanvas?'block':'none'; video.style.display=needCanvas?'none':'block';
+        const mirror=(settings.facingMode==='user'&&state.mirror);
+        if(needCanvas){
+          ctx.save(); if(mirror){ctx.translate(canvas.width,0);ctx.scale(-1,1)};ctx.drawImage(video,0,0,canvas.width,canvas.height);ctx.restore();
+          let frame=ctx.getImageData(0,0,canvas.width,canvas.height);
+          processPixels(frame); ctx.putImageData(frame,0,0);
+        }
+        if(histOn) drawHistogram();
+      }
+      requestAnimationFrame(loop);
+    }; loop();
+  }
+  function logCurve(x){
+    // monitoring-only shoulder/toe curve: compress display luminance, does not add DR.
+    x=Math.max(0,Math.min(1,x));
+    return Math.log2(1+15*x)/4;
+  }
+  function falseColorRGB(y){
+    if(y<.1)return[55,28,121]; if(y<.3)return[22,67,154]; if(y<.48)return[3,160,199];
+    if(y<.63)return[43,189,99]; if(y<.76)return[214,182,38]; if(y<.9)return[232,116,22]; return[245,245,245];
+  }
+  function processPixels(img){
+    const d=img.data, threshold=state.zebraThreshold/100;
+    let prev = peaking ? new Uint8ClampedArray(d) : null;
+    for(let i=0;i<d.length;i+=4){
+      let r=d[i]/255,g=d[i+1]/255,b=d[i+2]/255;
+      const y=.2126*r+.7152*g+.0722*b;
+      if(falseColor){ const c=falseColorRGB(y); d[i]=c[0];d[i+1]=c[1];d[i+2]=c[2]; continue; }
+      if(monitorMode==='log'){ d[i]=255*logCurve(r);d[i+1]=255*logCurve(g);d[i+2]=255*logCurve(b); }
+      if(zebra && y>=threshold){
+        const p=(i/4),x=p%canvas.width,yc=Math.floor(p/canvas.width);
+        if(((x+yc)>>3)%2===0){d[i]=255;d[i+1]=255;d[i+2]=255}else{d[i]=20;d[i+1]=20;d[i+2]=20}
+      }
+    }
+    if(peaking && prev){
+      const w=canvas.width,h=canvas.height;
+      for(let y=1;y<h-1;y+=2)for(let x=1;x<w-1;x+=2){
+        const p=(y*w+x)*4;
+        const lum = k=>.2126*prev[k]+.7152*prev[k+1]+.0722*prev[k+2];
+        const gx=Math.abs(lum(p+4)-lum(p-4)), gy=Math.abs(lum(p+w*4)-lum(p-w*4));
+        if(gx+gy>70){ for(let yy=0;yy<2;yy++)for(let xx=0;xx<2;xx++){const q=((y+yy)*w+x+xx)*4;d[q]=0;d[q+1]=255;d[q+2]=80;} }
+      }
+    }
+  }
+  function drawHistogram(){
+    if(video.readyState<2)return;
+    const temp=document.createElement('canvas');temp.width=180;temp.height=100;const tc=temp.getContext('2d');tc.drawImage(video,0,0,180,100);
+    const d=tc.getImageData(0,0,180,100).data,bins=new Uint32Array(64);
+    for(let i=0;i<d.length;i+=4){const y=Math.min(63,Math.floor((.2126*d[i]+.7152*d[i+1]+.0722*d[i+2])/256*64));bins[y]++}
+    const max=Math.max(...bins);hctx.clearRect(0,0,hist.width,hist.height);hctx.fillStyle='#eef2f4';
+    bins.forEach((v,i)=>{const h=(v/max)*(hist.height-10);hctx.fillRect(i*(hist.width/64),hist.height-h,hist.width/64-1,h)});
+  }
+
+  function openSheet(id){ $(id).classList.remove('hidden'); }
+  function closeSheets(){ $$('.sheet').forEach(x=>x.classList.add('hidden')); }
+
+  $('#startBtn').onclick=startCamera; $('#settingsBtn').onclick=()=>openSheet('#settingsScreen'); $('#clipsBtn').onclick=()=>openSheet('#clipsScreen');
+  $$('.back').forEach(b=>b.onclick=closeSheets);
+  $('#cameraSelect').onchange=async e=>{currentDeviceId=e.target.value;closeSheets();await startCamera()};
+  $('#resolution').onchange=async e=>{state.resolution=e.target.value;await startCamera()};
+  $('#fps').onchange=async e=>{state.fps=e.target.value;await startCamera()};
+  $('#audioToggle').onchange=async e=>{state.audio=e.target.checked;await startCamera()};
+  $('#mirrorToggle').onchange=e=>state.mirror=e.target.checked;
+  $('#zebraThreshold').oninput=e=>{state.zebraThreshold=Number(e.target.value);$('#zebraValue').textContent=e.target.value+'%';$('#zebraLegend').textContent='ZEBRA '+e.target.value+'+'};
+  $('#logToggle').onchange=e=>{monitorMode=e.target.checked?'log':'normal'};
+
+  $$('[data-monitor]').forEach(b=>b.onclick=()=>{monitorMode=b.dataset.monitor;$$('[data-monitor]').forEach(x=>x.classList.toggle('active',x===b));});
+  $('#zebraBtn').onclick=e=>{zebra=!zebra;e.currentTarget.classList.toggle('active',zebra);$('#zebraLegend').classList.toggle('hidden',!zebra)};
+  $('#falseBtn').onclick=e=>{falseColor=!falseColor;e.currentTarget.classList.toggle('active',falseColor);$('#falseLegend').classList.toggle('hidden',!falseColor)};
+  $('#peakingBtn').onclick=e=>{peaking=!peaking;e.currentTarget.classList.toggle('active',peaking)};
+  $('#histBtn').onclick=e=>{histOn=!histOn;e.currentTarget.classList.toggle('active',histOn);$('#histogramPanel').classList.toggle('hidden',!histOn)};
+  $('#gridBtn').onclick=e=>{const on=$('#grid').classList.toggle('hidden');e.currentTarget.classList.toggle('active',!on)};
+
+  $('#torchBtn').onclick=async e=>{
+    const on=e.currentTarget.dataset.on!=='1';try{await currentTrack.applyConstraints({advanced:[{torch:on}]});e.currentTarget.dataset.on=on?'1':'0';e.currentTarget.classList.toggle('active',on)}catch(err){alert('Torch non disponibile in questa modalità.')}
+  };
+  $('#cameraBtn').onclick=async()=>{ const devices=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput'); if(devices.length<2)return; let i=devices.findIndex(d=>d.deviceId===currentDeviceId);currentDeviceId=devices[(i+1)%devices.length].deviceId;await startCamera()};
+
+  $('#recordBtn').onclick=async()=>{
+    if(!stream)return;
+    if(recorder && recorder.state==='recording'){recorder.stop();return}
+    chunks=[];bytes=0; const mime=bestMime();
+    try{
+      recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);
+      recorder.ondataavailable=e=>{if(e.data?.size){chunks.push(e.data);bytes+=e.data.size;$('#sizeLabel').textContent=(bytes/1048576).toFixed(1)+' MB'}};
+      recorder.onstop=finishRecording;recorder.start(1000);startedAt=Date.now();
+      $('#recordBtn').classList.add('recording');status('REC','#ff3b30');
+      timerID=setInterval(()=>$('#timer').textContent=fmtTime(Date.now()-startedAt),250);
+    }catch(e){alert('Registrazione non disponibile: '+e.message)}
+  };
+  function finishRecording(){
+    clearInterval(timerID);$('#recordBtn').classList.remove('recording');status('PRONTO');
+    const type=recorder.mimeType||bestMime()||'video/mp4';blob=new Blob(chunks,{type});
+    if(blobURL)URL.revokeObjectURL(blobURL);blobURL=URL.createObjectURL(blob);$('#playback').src=blobURL;
+    $('#clipMeta').textContent=`${(blob.size/1048576).toFixed(1)} MB • ${type} • ${fmtTime(Date.now()-startedAt)}`;
+    $('#shareBtn').disabled=false;$('#downloadBtn').disabled=false;
+  }
+  function fileExt(){return (blob?.type||'').includes('webm')?'webm':'mp4'}
+  function currentFile(){return new File([blob],`LumaLog_${new Date().toISOString().replace(/[:.]/g,'-')}.${fileExt()}`,{type:blob.type})}
+  $('#shareBtn').onclick=async()=>{if(!blob)return;const f=currentFile();if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:'LumaLog clip'}).catch(()=>{})}else downloadBlob()};
+  $('#downloadBtn').onclick=downloadBlob;
+  function downloadBlob(){if(!blob)return;const a=document.createElement('a');a.href=blobURL;a.download=currentFile().name;a.click()}
+  $('#copyDiag').onclick=async()=>{await navigator.clipboard.writeText($('#diagnostics').textContent);$('#copyDiag').textContent='COPIATO';setTimeout(()=>$('#copyDiag').textContent='COPIA DIAGNOSTICA',1200)}
+
+  window.addEventListener('resize',()=>{canvas.width=0});
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden && recorder?.state==='recording') status('REC • BACKGROUND','#f0b429') });
+  
+})();
+
+</script>
+</body>
+</html>
